@@ -1,0 +1,30 @@
+<!--
+    Spring Boot Security tutorial 
+
+    https://github.com/egalli64/spring-security
+ -->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Spring Security Tutorial</title>
+</head>
+<body>
+    <div>
+        <h1 th:text="${message}">Welcome!</h1>
+
+        <div>
+            <em>This application currently has no security. All endpoints are accessible to everyone</em>
+        </div>
+
+        <h2>Available Endpoints:</h2>
+
+        <ul>
+            <li><a href="/">/ (home)</a> <em>Should be accessible to everyone</em></li>
+            <li><a href="/public">/public</a> <em>Should be accessible to everyone</em></li>
+            <li><a href="/private">/private</a> <em>Should require authentication</em></li>
+            <li><a href="/admin">/admin</a> <em>Should require admin role</em></li>
+        </ul>
+    </div>
+</body>
+</html>

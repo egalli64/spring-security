@@ -1,0 +1,25 @@
+<!--
+    Spring Boot Security tutorial 
+
+    https://github.com/egalli64/spring-security
+ -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${title}">Page Title</title>
+</head>
+<body>
+    <div>
+        <h1 th:text="${title}">Page Title</h1>
+        
+        <div>
+            <h2>Access Granted!</h2>
+            <p th:text="${content}">Page content</p>
+        </div>
+        
+        <div>
+            <a href="/">Home</a>
+        </div>
+    </div>
+</body>
+</html>
