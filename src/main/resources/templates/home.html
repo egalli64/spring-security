@@ -5,7 +5,7 @@
  -->
 
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <title>Spring Security Tutorial</title>
 </head>
@@ -14,7 +14,20 @@
         <h1 th:text="${message}">Welcome!</h1>
 
         <div>
-            <em>This application currently has no security. All endpoints are accessible to everyone</em>
+            <em>Spring Security enabled by auto-configuration</em>
+            <div sec:authorize="isAuthenticated()">
+                <p>
+                    Welcome, <span sec:authentication="name">unknown</span>!
+                </p>
+                <form th:action="@{/logout}" method="post">
+                    <input type="submit" value="Logout">
+                </form>
+
+            </div>
+            <div sec:authorize="!isAuthenticated()">
+                <!-- You should never see this! A non-authenticated user should never get to this page! -->
+                <p>Not logged in</p>
+            </div>
         </div>
 
         <h2>Available Endpoints:</h2>
