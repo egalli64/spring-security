@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class AppController {
-    @GetMapping("/")
+    @GetMapping("/home")
     public String home(Model model) {
         model.addAttribute("message", "Welcome to Spring Security Tutorial!");
         return "home";
