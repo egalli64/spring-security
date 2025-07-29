@@ -14,15 +14,13 @@
         <h1 th:text="${message}">Welcome!</h1>
 
         <div>
-            <em>Spring Security enabled by auto-configuration</em>
+            <em>HTTP Basic Authentication Enabled</em>
             <div sec:authorize="isAuthenticated()">
                 <p>
-                    Welcome, <span sec:authentication="name">unknown</span>!
+                    Welcome, <span sec:authentication="name">unknown</span>! Your roles: <span
+                        sec:authentication="principal.authorities">roles</span> <br>
+                    <br>Note: HTTP Basic Auth doesn't support proper logout due to browser credential caching
                 </p>
-                <form th:action="@{/logout}" method="post">
-                    <input type="submit" value="Logout">
-                </form>
-
             </div>
             <div sec:authorize="!isAuthenticated()">
                 <!-- You should never see this! A non-authenticated user should never get to this page! -->
