@@ -1,15 +1,30 @@
 # Spring Security Tutorial
 
-## Branch 2: Auto-Configuration
+## Branch 3: HTTP Basic Authentication
 
-A plain Spring Boot Thymeleaf application secured by default
+Let's override the Spring Security auto-configuration:
+- No login form, basic authorization dialog is shown instead
+- Credentials are sent with every request
+- Allows public endpoints
+- What is not explicitly allowed is forbidden
 
-Just adding the spring-boot-starter-security dependency
+### See the class SecurityConfig
+- Annotated @Configuration @EnableWebSecurity
+- SecurityFilterChain bean
+	- Generates a DefaultSecurityFilterChain
+	- Configured for HTTP Basic Authentication by .httpBasic()
+	- Disabling form-based authentication by .formLogin()
+	- Authorizing users / roles on given paths by .authorizeHttpRequests()
+		- Using requestMatchers(), permitAll(), hasRole(), anyRequest(), denyAll()
+	- It is possible to disable (partially) CSRF when required
+- UserDetailsService bean
+	- Generates a InMemoryUserDetailsManager with predefined users / roles
+- PasswordEncoder bean
+	- Generates a BCrypt password encoder
+	- Used by the UserDetailsService bean
 
-- Form-based authentication for all endpoints
-- Default user (with name user)
-- Random password (see console log at startup)
-- Default login/logout pages
-- Session management
-- All endpoints require authentication
-- The response includes headers for improved security
+## Security Headers
+
+Basic Auth automatically adds headers:
+- WWW-Authenticate: Basic realm="Spring Security Tutorial"
+- Standard security headers (X-Frame-Options, etc.)
