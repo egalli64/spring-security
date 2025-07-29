@@ -13,3 +13,5 @@ Just adding the spring-boot-starter-security dependency
 - Session management
 - All endpoints require authentication
 - The response includes headers for improved security
+
+Switch to branch 03-basic-auth for HTTP Basic Authentication
