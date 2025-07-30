@@ -1,8 +1,8 @@
 # Spring Security Tutorial
 
-## Main Branch: No Security
+## Step 1: No Security
 
-A plain Spring Boot Thymeleaf application **without** any security.
+A plain Spring Boot Thymeleaf application without any security.
 
 ## Next Step
 
