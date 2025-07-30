@@ -4,6 +4,8 @@
 
 A plain Spring Boot Thymeleaf application **without** any security.
 
-## Next Step
+## Branches
 
-Switch to branch 02-auto-config for default security
+- 1.1 - No security
+- 1.2 - Default security
+- 1.3 - HTTP Basic Authentication
