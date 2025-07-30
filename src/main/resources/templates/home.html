@@ -5,7 +5,7 @@
  -->
 
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <title>Spring Security Tutorial</title>
 </head>
@@ -14,7 +14,18 @@
         <h1 th:text="${message}">Welcome!</h1>
 
         <div>
-            <em>This application currently has no security. All endpoints are accessible to everyone</em>
+            <em>HTTP Basic Authentication Enabled</em>
+            <div sec:authorize="isAuthenticated()">
+                <p>
+                    Welcome, <span sec:authentication="name">unknown</span>! Your roles: <span
+                        sec:authentication="principal.authorities">roles</span> <br>
+                    <br>Note: HTTP Basic Auth doesn't support proper logout due to browser credential caching
+                </p>
+            </div>
+            <div sec:authorize="!isAuthenticated()">
+                <!-- You should never see this! A non-authenticated user should never get to this page! -->
+                <p>Not logged in</p>
+            </div>
         </div>
 
         <h2>Available Endpoints:</h2>
