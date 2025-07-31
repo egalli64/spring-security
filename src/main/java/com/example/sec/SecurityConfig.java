@@ -21,27 +21,26 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     /**
-     * Configure HTTP Basic Authentication
+     * Configure Form-Based Authentication
      */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.httpBasic(httpBasic -> httpBasic.realmName("Spring Security Tutorial"))
-                // only Basic Auth
-                .formLogin(form -> form.disable())
+        // Disable HTTP Basic - using form login instead
+        http.httpBasic(httpBasic -> httpBasic.disable())
+                // Enable form login - custom login page
+                .formLogin(form -> form.loginPage("/login").loginProcessingUrl("/do_login")
+                        // redirections after success/failure
+                        .defaultSuccessUrl("/", true).failureUrl("/login?error=true") //
+                        .permitAll())
+                // logout configuration
+                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
                 // Two roles + public
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public").permitAll() //
                         .requestMatchers("/admin").hasRole("ADMIN") //
                         .requestMatchers("/private").hasRole("USER") //
-                        // the endpoints not specified above are all denied
                         .anyRequest().denyAll());
         // Disable Cross-Site Request Forgery for curl testing
         // .csrf(csrf -> csrf.disable())
-        // For "classic" webapp, the use of non-GET form requires passing the CSRF token
-        // <input type="hidden" th:name="${_csrf.parameterName}"
-        // th:value="${_csrf.token}"/>
-
-        // SPA with REST API could need
-        // csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()
 
         return http.build();
     }
