@@ -1,0 +1,30 @@
+<!--
+    Spring Boot Security tutorial 
+
+    https://github.com/egalli64/spring-security
+ -->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+
+    <!-- Error message -->
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}">Error message</p>
+    </div>
+
+    <form th:action="@{/do_login}" method="post">
+        <label>User: <input name="username" required autofocus></label> <label>Password: <input
+            type="password" name="password" required></label>
+        <button>Login</button>
+    </form>
+
+    <p>
+        <a href="/">Home</a>
+    </p>
+</body>
+</html>
