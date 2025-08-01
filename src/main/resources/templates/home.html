@@ -38,6 +38,7 @@
             <li><a href="/public">/public</a> <em>Should be accessible to everyone</em></li>
             <li><a href="/private">/private</a> <em>Should require authentication</em></li>
             <li><a href="/admin">/admin</a> <em>Should require admin role</em></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/users">/users</a> <em>User management (admin)</em></li>
         </ul>
     </div>
 </body>
