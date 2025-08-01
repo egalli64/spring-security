@@ -1,0 +1,58 @@
+<!--
+    Spring Boot Security tutorial 
+
+    https://github.com/egalli64/spring-security
+ -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${title}">Create New User</title>
+</head>
+<body>
+    <div>
+        <h1 th:text="${title}">Create New User</h1>
+        
+        <!-- Error message -->
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}">Error message</p>
+        </div>
+        
+        <form th:action="@{/users/create}" method="post">
+            <div>
+                <label>Username: 
+                    <input name="username" required autofocus>
+                </label>
+            </div>
+            
+            <div>
+                <label>Password: 
+                    <input type="password" name="password" required>
+                </label>
+            </div>
+            
+            <div>
+                <label>Roles:</label>
+                <div>
+                    <label>
+                        <input type="checkbox" name="hasUserRole" value="true"> USER
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" name="hasAdminRole" value="true"> ADMIN
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <button type="submit">Create User</button>
+            </div>
+        </form>
+        
+        <div>
+            <a href="/users">Back to User List</a> |
+            <a href="/">Home</a>
+        </div>
+    </div>
+</body>
+</html>
