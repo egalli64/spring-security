@@ -9,17 +9,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final SecUserDetailsService secUserSvc;
+
+    public SecurityConfig(SecUserDetailsService secUserSvc) {
+        this.secUserSvc = secUserSvc;
+    }
+
     /**
      * Configure Form-Based Authentication
      */
@@ -34,34 +34,18 @@ public class SecurityConfig {
                         .permitAll())
                 // logout configuration
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
+                // use SecUserDetailsService
+                .userDetailsService(secUserSvc)
                 // Two roles + public
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public").permitAll() //
                         .requestMatchers("/admin").hasRole("ADMIN") //
                         .requestMatchers("/private").hasRole("USER") //
+                        // Allow access to user management endpoints for admins
+                        .requestMatchers("/users/**").hasRole("ADMIN") //
                         .anyRequest().denyAll());
         // Disable Cross-Site Request Forgery for curl testing
         // .csrf(csrf -> csrf.disable())
 
         return http.build();
-    }
-
-    /**
-     * Configure each user with password and associated roles
-     */
-    @Bean
-    UserDetailsService userDetailsService() {
-        PasswordEncoder encoder = passwordEncoder();
-
-        UserDetails user = User.builder().username("user").password(encoder.encode("password")).roles("USER").build();
-        UserDetails admin = User.builder().username("admin").password(encoder.encode("admin")).roles("ADMIN").build();
-        UserDetails superuser = User.builder().username("superuser").password(encoder.encode("super"))
-                .roles("USER", "ADMIN").build();
-
-        return new InMemoryUserDetailsManager(user, admin, superuser);
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
