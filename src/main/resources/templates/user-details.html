@@ -1,0 +1,54 @@
+<!--
+    Spring Boot Security tutorial 
+
+    https://github.com/egalli64/spring-security
+ -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${title}">User Details</title>
+</head>
+<body>
+    <div>
+        <h1 th:text="${title}">User Details</h1>
+        
+        <!-- Success/Error messages -->
+        <div th:if="${successMessage}">
+            <p th:text="${successMessage}">Success message</p>
+        </div>
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}">Error message</p>
+        </div>
+        
+        <div>
+            <h2>User Information</h2>
+            <p>Username: <span th:text="${user.username}">username</span></p>
+            <p>Roles: <span th:text="${user.roles}">roles</span></p>
+            <p>Enabled: <span th:text="${user.enabled}">true</span></p>
+            <p>Account Expired: <span th:text="${user.accountExpired}">false</span></p>
+            <p>Account Locked: <span th:text="${user.accountLocked}">false</span></p>
+            <p>Credentials Expired: <span th:text="${user.credentialsExpired}">false</span></p>
+        </div>
+        
+        <div>
+            <h3>Actions</h3>
+            
+            <!-- Toggle enabled status -->
+            <form th:action="@{/users/{username}/toggle-enabled(username=${user.username})}" method="post" style="display: inline;">
+                <button type="submit" th:text="${user.enabled} ? 'Disable User' : 'Enable User'">Toggle Status</button>
+            </form>
+            
+            <!-- Delete user -->
+            <form th:action="@{/users/{username}/delete(username=${user.username})}" method="post" style="display: inline;" 
+                  onsubmit="return confirm('Are you sure you want to delete this user?')">
+                <button type="submit">Delete User</button>
+            </form>
+        </div>
+        
+        <div>
+            <a href="/users">Back to User List</a> |
+            <a href="/">Home</a>
+        </div>
+    </div>
+</body>
+</html>
