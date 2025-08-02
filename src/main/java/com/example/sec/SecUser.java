@@ -5,44 +5,65 @@
  */
 package com.example.sec;
 
+import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Security User
- */
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "USERS")
 public class SecUser {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false, length = 50)
     private String username;
+
+    @Column(nullable = false)
     private String password;
-    private Set<String> roles;
-    private boolean enabled;
-    private boolean accountExpired;
-    private boolean accountLocked;
-    private boolean credentialsExpired;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
+
+    @Column(nullable = false)
+    private boolean accountExpired = false;
+
+    @Column(nullable = false)
+    private boolean accountLocked = false;
+
+    @Column(nullable = false)
+    private boolean credentialsExpired = false;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @JoinTable(name = "USER_ROLES", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<SecRole> roles = new HashSet<>();
 
     public SecUser() {
-        this.enabled = true;
-        this.accountExpired = false;
-        this.accountLocked = false;
-        this.credentialsExpired = false;
     }
 
-    public SecUser(String username, String password, Set<String> roles) {
-        this();
+    public SecUser(String username, String password, Set<SecRole> roles) {
         this.username = username;
         this.password = password;
         this.roles = roles;
     }
 
-    // Canonical constructor
-    public SecUser(String username, String password, Set<String> roles, boolean enabled, boolean accountExpired,
-            boolean accountLocked, boolean credentialsExpired) {
-        this.username = username;
-        this.password = password;
-        this.roles = roles;
-        this.enabled = enabled;
-        this.accountExpired = accountExpired;
-        this.accountLocked = accountLocked;
-        this.credentialsExpired = credentialsExpired;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -59,14 +80,6 @@ public class SecUser {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
     }
 
     public boolean isEnabled() {
@@ -101,8 +114,25 @@ public class SecUser {
         this.credentialsExpired = credentialsExpired;
     }
 
+    public Set<SecRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<SecRole> roles) {
+        this.roles = roles;
+    }
+
+    // Helper
+    public Set<String> getRoleNames() {
+        Set<String> roleNames = new HashSet<>();
+        for (SecRole role : roles) {
+            roleNames.add(role.getName());
+        }
+        return roleNames;
+    }
+
     @Override
     public String toString() {
-        return "User{" +  username + ", roles=" + roles + ", enabled=" + enabled + '}';
+        return "SecUser{" + username + ", roles=" + getRoleNames() + ", enabled=" + enabled + '}';
     }
 }
