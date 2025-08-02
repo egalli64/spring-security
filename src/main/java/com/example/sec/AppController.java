@@ -18,7 +18,7 @@ public class AppController {
 
     @GetMapping("/")
     public String home(Model model) {
-        log.traceEntry();
+        log.traceEntry("home()");
 
         model.addAttribute("message", "Welcome to Spring Security Tutorial!");
         return "home";
@@ -26,7 +26,7 @@ public class AppController {
 
     @GetMapping("/public")
     public String publicEndpoint(Model model) {
-        log.traceEntry();
+        log.traceEntry("publicEndpoint()");
 
         model.addAttribute("title", "A public page");
         model.addAttribute("content", "This page should be accessible to everyone");
@@ -36,7 +36,7 @@ public class AppController {
 
     @GetMapping("/private")
     public String privateEndpoint(Model model) {
-        log.traceEntry();
+        log.traceEntry("privateEndpoint()");
 
         model.addAttribute("title", "A private page");
         model.addAttribute("content", "This page should require authentication");
@@ -46,7 +46,7 @@ public class AppController {
 
     @GetMapping("/admin")
     public String adminEndpoint(Model model) {
-        log.traceEntry();
+        log.traceEntry("adminEndpoint()");
 
         model.addAttribute("title", "An admin page");
         model.addAttribute("content", "This page should require admin role");
@@ -59,7 +59,7 @@ public class AppController {
      */
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error, Model model) {
-        log.traceEntry("error is {}", error);
+        log.traceEntry("login({})", error);
 
         if (error != null) {
             model.addAttribute("errorMessage", "Invalid username or password");
