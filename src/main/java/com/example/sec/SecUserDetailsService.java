@@ -25,26 +25,26 @@ import org.springframework.stereotype.Service;
 public class SecUserDetailsService implements UserDetailsService {
     private static final Logger log = LogManager.getLogger(SecUserDetailsService.class);
 
-    private final UserRepository repo;
+    private final SecUserService svc;
 
-    public SecUserDetailsService(UserRepository repo) {
-        this.repo = repo;
+    public SecUserDetailsService(SecUserService svc) {
+        this.svc = svc;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.traceEntry("User: {}", username);
+        log.traceEntry("loadUserByUsername({})", username);
 
-        SecUser user = repo.findByUsername(username).orElseThrow(() -> {
-            log.warn("User not found: {}", username);
+        SecUser user = svc.findByUsername(username).orElseThrow(() -> {
+            log.warn("User '{}' not found", username);
             return new UsernameNotFoundException("User not found: " + username);
         });
 
-        log.debug("Found user: {} with roles: {}", user.getUsername(), user.getRoles());
+        log.debug("Found user '{}' with roles '{}'", user.getUsername(), user.getRoles());
 
         // Convert business user to Security UserDetails
         return User.builder().username(user.getUsername()).password(user.getPassword())
-                .authorities(mapRolesToAuthorities(user.getRoles())).accountExpired(user.isAccountExpired())
+                .authorities(mapRolesToAuthorities(user.getRoleNames())).accountExpired(user.isAccountExpired())
                 .accountLocked(user.isAccountLocked()).credentialsExpired(user.isCredentialsExpired())
                 .disabled(!user.isEnabled()).build();
     }
@@ -55,9 +55,5 @@ public class SecUserDetailsService implements UserDetailsService {
     private Collection<GrantedAuthority> mapRolesToAuthorities(Collection<String> roles) {
         return roles.stream().map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
                 .map(SimpleGrantedAuthority::new).<GrantedAuthority>map(x -> x).toList();
-    }
-
-    public UserRepository getRepo() {
-        return repo;
     }
 }
