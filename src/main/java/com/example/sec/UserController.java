@@ -22,10 +22,10 @@ import java.util.Set;
 public class UserController {
     private static final Logger log = LogManager.getLogger(UserController.class);
 
-    private final UserRepository userStore;
+    private final SecUserService svc;
 
-    public UserController(UserRepository userStore) {
-        this.userStore = userStore;
+    public UserController(SecUserService svc) {
+        this.svc = svc;
     }
 
     /**
@@ -36,8 +36,8 @@ public class UserController {
         log.traceEntry();
 
         model.addAttribute("title", "User Management");
-        model.addAttribute("usernames", userStore.getAllUsernames());
-        model.addAttribute("userCount", userStore.getSize());
+        model.addAttribute("usernames", svc.getAllUsernames());
+        model.addAttribute("userCount", svc.getSize());
 
         return "user-list";
     }
@@ -49,7 +49,7 @@ public class UserController {
     public String show(@PathVariable String username, Model model, RedirectAttributes attrs) {
         log.traceEntry("username: {}", username);
 
-        return userStore.findByUsername(username).map(user -> {
+        return svc.findByUsername(username).map(user -> {
             model.addAttribute("title", "User Details: " + username);
             model.addAttribute("user", user);
             return "user-details";
@@ -94,7 +94,7 @@ public class UserController {
                 return "redirect:/users/create";
             }
 
-            userStore.create(username, password, roles);
+            svc.create(username, password, roles);
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully: " + username);
             return "redirect:/users";
 
@@ -112,9 +112,9 @@ public class UserController {
     public String toggleEnabled(@PathVariable String username, RedirectAttributes attrs) {
         log.traceEntry("username: {}", username);
 
-        return userStore.findByUsername(username).map(user -> {
+        return svc.findByUsername(username).map(user -> {
             boolean status = !user.isEnabled();
-            userStore.setEnabled(username, status);
+            svc.setEnabled(username, status);
 
             attrs.addFlashAttribute("successMessage",
                     "User " + username + " has been " + (status ? "enabled" : "disabled"));
@@ -132,7 +132,7 @@ public class UserController {
     public String delete(@PathVariable String username, RedirectAttributes attrs) {
         log.traceEntry("username: {}", username);
 
-        if (userStore.delete(username)) {
+        if (svc.delete(username)) {
             attrs.addFlashAttribute("successMessage", "User deleted: " + username);
         } else {
             attrs.addFlashAttribute("errorMessage", "Failed to delete user: " + username);
