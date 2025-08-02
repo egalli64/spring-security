@@ -9,15 +9,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final SecUserDetailsService secUserSvc;
+    private final SecUserDetailsService svc;
 
     public SecurityConfig(SecUserDetailsService secUserSvc) {
-        this.secUserSvc = secUserSvc;
+        this.svc = secUserSvc;
     }
 
     /**
@@ -34,17 +35,18 @@ public class SecurityConfig {
                         .permitAll())
                 // logout configuration
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
-                // use SecUserDetailsService
-                .userDetailsService(secUserSvc)
-                // Two roles + public
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public").permitAll() //
+                // use the app-specific UserDetailsService
+                .userDetailsService(svc)
+                // Two roles + public and H2 console
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public", "/h2-console/**").permitAll() //
                         .requestMatchers("/admin").hasRole("ADMIN") //
                         .requestMatchers("/private").hasRole("USER") //
                         // Allow access to user management endpoints for admins
                         .requestMatchers("/users/**").hasRole("ADMIN") //
-                        .anyRequest().denyAll());
-        // Disable Cross-Site Request Forgery for curl testing
-        // .csrf(csrf -> csrf.disable())
+                        .anyRequest().denyAll())
+                // Disable Cross-Site Request Forgery for H2
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         return http.build();
     }
