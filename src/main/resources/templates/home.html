@@ -3,7 +3,6 @@
 
     https://github.com/egalli64/spring-security
  -->
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
@@ -14,7 +13,9 @@
         <h1 th:text="${message}">Welcome!</h1>
 
         <div>
-            <em>Form-Based Login Authentication Enabled</em>
+            <div th:if="${errorMessage}">
+                <span th:text="${errorMessage}"></span>
+            </div>
             <div sec:authorize="isAuthenticated()">
                 <p>
                     Welcome, <span sec:authentication="name">unknown</span>! Your roles: <span
@@ -36,9 +37,9 @@
         <ul>
             <li><a href="/">/ (home)</a> <em>Should be accessible to everyone</em></li>
             <li><a href="/public">/public</a> <em>Should be accessible to everyone</em></li>
-            <li><a href="/private">/private</a> <em>Should require authentication</em></li>
-            <li><a href="/admin">/admin</a> <em>Should require admin role</em></li>
-            <li sec:authorize="hasRole('ADMIN')"><a href="/users">/users</a> <em>User management (admin)</em></li>
+            <li sec:authorize="hasRole('USER')"><a href="/private">/private</a> <em>Should require user role</em></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/admin">/admin</a> <em>Should require admin role</em></li>
+            <li><a href="/users">/users</a> <em>User management (admin)</em></li>
         </ul>
     </div>
 </body>
