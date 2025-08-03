@@ -9,107 +9,136 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.annotation.security.RolesAllowed;
+
 @Service
 @Transactional
 public class SecUserService {
-    private final SecUserRepository userRepository;
-    private final SecRoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final SecUserRepository userRepo;
+    private final SecRoleRepository roleRepo;
+    private final PasswordEncoder encoder;
 
-    public SecUserService(SecUserRepository userRepository, SecRoleRepository roleRepository,
-            PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+    public SecUserService(SecUserRepository userRepo, SecRoleRepository roleRepo, PasswordEncoder encoder) {
+        this.userRepo = userRepo;
+        this.roleRepo = roleRepo;
+        this.encoder = encoder;
     }
 
+    @RolesAllowed("ADMIN")
+//    @Secured("ROLE_ADMIN")
+//    @PreAuthorize("hasRole('ADMIN')")
     public SecUser create(String username, String password, Set<String> roleNames) {
-        if (userRepository.existsByUsername(username)) {
+        if (userRepo.existsByUsername(username)) {
             throw new IllegalArgumentException("User already exists: " + username);
         }
 
         Set<SecRole> roles = new HashSet<>();
         for (String roleName : roleNames) {
-            SecRole role = roleRepository.findByName(roleName)
+            SecRole role = roleRepo.findByName(roleName)
                     .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
             roles.add(role);
         }
 
-        SecUser user = new SecUser(username, passwordEncoder.encode(password), roles);
-        return userRepository.save(user);
+        SecUser user = new SecUser(username, encoder.encode(password), roles);
+        return userRepo.save(user);
     }
 
+    // It's always possible to get a user (otherwise, how to login?)
     @Transactional(readOnly = true)
     public Optional<SecUser> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepo.findByUsername(username);
     }
 
+    @RolesAllowed("ADMIN")
+//    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
+        return userRepo.existsByUsername(username);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or authentication.name == #username")
     public boolean updatePassword(String username, String password) {
-        Optional<SecUser> userOpt = userRepository.findByUsername(username);
+        Optional<SecUser> userOpt = userRepo.findByUsername(username);
         if (userOpt.isPresent()) {
             SecUser user = userOpt.get();
-            user.setPassword(passwordEncoder.encode(password));
-            userRepository.save(user);
+            user.setPassword(encoder.encode(password));
+            userRepo.save(user);
             return true;
         }
         return false;
     }
 
+    @RolesAllowed("ADMIN")
+//    @PreAuthorize("hasRole('ADMIN')")
     public boolean updateRoles(String username, Set<String> newRoleNames) {
-        Optional<SecUser> userOpt = userRepository.findByUsername(username);
+        Optional<SecUser> userOpt = userRepo.findByUsername(username);
         if (userOpt.isPresent()) {
             SecUser user = userOpt.get();
 
             Set<SecRole> newRoles = new HashSet<>();
             for (String roleName : newRoleNames) {
-                SecRole role = roleRepository.findByName(roleName)
+                SecRole role = roleRepo.findByName(roleName)
                         .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
                 newRoles.add(role);
             }
 
             user.setRoles(newRoles);
-            userRepository.save(user);
+            userRepo.save(user);
             return true;
         }
         return false;
     }
 
+    @RolesAllowed("ADMIN")
+//    @PreAuthorize("hasRole('ADMIN')")
     public boolean setEnabled(String username, boolean enabled) {
-        Optional<SecUser> userOpt = userRepository.findByUsername(username);
+        Optional<SecUser> userOpt = userRepo.findByUsername(username);
         if (userOpt.isPresent()) {
             SecUser user = userOpt.get();
             user.setEnabled(enabled);
-            userRepository.save(user);
+            userRepo.save(user);
             return true;
         }
         return false;
     }
 
+    @RolesAllowed("ADMIN")
+//    @PreAuthorize("hasRole('ADMIN')")
     public boolean delete(String username) {
-        Optional<SecUser> userOpt = userRepository.findByUsername(username);
+        Optional<SecUser> userOpt = userRepo.findByUsername(username);
         if (userOpt.isPresent()) {
-            userRepository.delete(userOpt.get());
+            userRepo.delete(userOpt.get());
             return true;
         }
         return false;
     }
 
+    @RolesAllowed({ "ADMIN", "USER" })
+//    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Transactional(readOnly = true)
     public Set<String> getAllUsernames() {
-        return userRepository.findAllUsernames();
+        return userRepo.findAllUsernames();
     }
 
+    @RolesAllowed({ "ADMIN", "USER" })
+//    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @Transactional(readOnly = true)
     public long getSize() {
-        return userRepository.count();
+        return userRepo.count();
+    }
+
+    /**
+     * Enforce admin access
+     * 
+     * @throws AccessDeniedException if the user has not admin role
+     */
+    @RolesAllowed("ADMIN")
+    public void requireAdminAccess() {
     }
 }
