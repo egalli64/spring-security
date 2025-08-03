@@ -8,21 +8,24 @@
 - 1.4 - Form-Based Login
 - 2.2 - Security users management
 - 2.3 - Database Authentication Setup
+- 2.4 - Method-Level Security
 
-## 2.3 - Database Authentication Setup
+## 2.4 - Method-Level Security
 
-- Database support
-	- POM: add Spring dependencies for DBMS (H2) through JPA
-	- application.properties: settings for JPA and the DBMS
-	- data.sql (new): H2 bootstrap
-	- SecurityConfig: permission to access h2-console (for development)
-- JPA
-	- SecRole (new): Role entity
-	- SecUser: refactored User entity
-	- SecRoleRepository (new): refactored Role repository
-	- SecUserRepository: refactored User repository
-- Service
-	- SecUserService (new): refactored out the logic from the repository
-	- SecUserDetailsService: use the service instead of accessing the repository
-- Controller
-	- UserController: use the service instead of accessing the repository
+- Method-Level Security activation
+	- SecurityConfig: annotated also with @EnableMethodSecurity
+- @PreAuthorize
+	- SecUserService: using SpEL hasRole(), hasAnyRole(), authentication.name == #username"
+- @PostAuthorize
+	- SecUserService: using also specific returnObject SpEL
+- @RolesAllowed
+	- SecUserService: if @Secured is used instead, prefix the role name with "ROLE_"
+- Flexibility:
+	- SecurityConfig: could just require to user to be logged to access some endpoints
+		- invoke authenticated() on the endpoint requestMatchers()
+		- delegate security check to the service
+- AccessDeniedException
+	- UserController: check if the service throws an exception
+		- Generate an error message
+		- Use RedirectAttributes to pass the error message to the redirected endpoint
+	
