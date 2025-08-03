@@ -7,6 +7,7 @@ package com.example.sec;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,14 +33,19 @@ public class UserController {
      * List all users
      */
     @GetMapping
-    public String list(Model model) {
-        log.traceEntry();
+    public String list(Model model, RedirectAttributes attrs) {
+        log.traceEntry("list()");
 
-        model.addAttribute("title", "User Management");
-        model.addAttribute("usernames", svc.getAllUsernames());
-        model.addAttribute("userCount", svc.getSize());
-
-        return "user-list";
+        try {
+            model.addAttribute("title", "User Management");
+            model.addAttribute("usernames", svc.getAllUsernames());
+            model.addAttribute("userCount", svc.getSize());
+            return "user-list";
+        } catch (AccessDeniedException e) {
+            log.warn("Can't list usernames", e);
+            attrs.addFlashAttribute("errorMessage", "Access denied: Insufficient privileges");
+            return "redirect:/";
+        }
     }
 
     /**
@@ -47,37 +53,46 @@ public class UserController {
      */
     @GetMapping("/{username}")
     public String show(@PathVariable String username, Model model, RedirectAttributes attrs) {
-        log.traceEntry("username: {}", username);
+        log.traceEntry("show({})", username);
 
-        return svc.findByUsername(username).map(user -> {
-            model.addAttribute("title", "User Details: " + username);
-            model.addAttribute("user", user);
-            return "user-details";
-        }).orElseGet(() -> {
-            attrs.addFlashAttribute("errorMessage", "User not found: " + username);
-            return "redirect:/users";
-        });
+        try {
+            return svc.findByUsername(username).map(user -> {
+                model.addAttribute("title", "User Details: " + username);
+                model.addAttribute("user", user);
+                return "user-details";
+            }).orElseGet(() -> {
+                log.info("User '{}' not found", username);
+                attrs.addFlashAttribute("errorMessage", "User not found: " + username);
+                return "redirect:/users";
+            });
+        } catch (AccessDeniedException e) {
+            log.warn("Can't show user details", e);
+            attrs.addFlashAttribute("errorMessage", "Access denied: Cannot view user details");
+            return "redirect:/";
+        }
     }
 
-    /**
-     * Show create user form
-     */
     @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        log.traceEntry();
+    public String showCreateForm(Model model, RedirectAttributes attrs) {
+        log.traceEntry("showCreateForm()");
 
-        model.addAttribute("title", "Create New User");
-        return "user-create";
+        try {
+            // accessing the service just to have a security check
+            svc.requireAdminAccess();
+            model.addAttribute("title", "Create New User");
+            return "user-create";
+        } catch (AccessDeniedException e) {
+            log.warn("Can't show create form", e);
+            attrs.addFlashAttribute("errorMessage", "Access denied: Admin privileges required");
+            return "redirect:/";
+        }
     }
 
-    /**
-     * Create new user
-     */
     @PostMapping("/create")
     public String create(@RequestParam String username, @RequestParam String password,
             @RequestParam(required = false) boolean hasUserRole, @RequestParam(required = false) boolean hasAdminRole,
-            RedirectAttributes redirectAttributes) {
-        log.traceEntry("username: {}, hasUserRole: {}, hasAdminRole: {}", username, hasUserRole, hasAdminRole);
+            RedirectAttributes attrs) {
+        log.traceEntry("create({}, {}, {})", username, hasUserRole, hasAdminRole);
 
         try {
             Set<String> roles = Set.of();
@@ -90,54 +105,63 @@ public class UserController {
             }
 
             if (roles.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "User must have at least one role");
+                log.warn("Can't create with no role");
+                attrs.addFlashAttribute("errorMessage", "User must have at least one role");
                 return "redirect:/users/create";
             }
 
             svc.create(username, password, roles);
-            redirectAttributes.addFlashAttribute("successMessage", "User created successfully: " + username);
+            attrs.addFlashAttribute("successMessage", "User created successfully: " + username);
             return "redirect:/users";
-
+        } catch (AccessDeniedException e) {
+            log.warn("Can't create user", e);
+            attrs.addFlashAttribute("errorMessage", "Access denied: Admin privileges required");
+            return "redirect:/";
         } catch (IllegalArgumentException e) {
-            log.warn("Failed to create user: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            log.warn("Failed to create user", e);
+            attrs.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/users/create";
         }
     }
 
-    /**
-     * Toggle user enabled status
-     */
     @PostMapping("/{username}/toggle-enabled")
     public String toggleEnabled(@PathVariable String username, RedirectAttributes attrs) {
-        log.traceEntry("username: {}", username);
+        log.traceEntry("toggleEnabled({})", username);
 
-        return svc.findByUsername(username).map(user -> {
-            boolean status = !user.isEnabled();
-            svc.setEnabled(username, status);
+        try {
+            return svc.findByUsername(username).map(user -> {
+                boolean status = !user.isEnabled();
+                svc.setEnabled(username, status);
 
-            attrs.addFlashAttribute("successMessage",
-                    "User " + username + " has been " + (status ? "enabled" : "disabled"));
-            return "redirect:/users/" + username;
-        }).orElseGet(() -> {
-            attrs.addFlashAttribute("errorMessage", "User not found: " + username);
-            return "redirect:/users";
-        });
+                attrs.addFlashAttribute("successMessage",
+                        "User " + username + " has been " + (status ? "enabled" : "disabled"));
+                return "redirect:/users/" + username;
+            }).orElseGet(() -> {
+                attrs.addFlashAttribute("errorMessage", "User not found: " + username);
+                return "redirect:/users";
+            });
+        } catch (AccessDeniedException e) {
+            log.warn("Can't toggle enabled", e);
+            attrs.addFlashAttribute("errorMessage", "Access denied: Admin privileges required");
+            return "redirect:/";
+        }
     }
 
-    /**
-     * Delete user
-     */
     @PostMapping("/{username}/delete")
     public String delete(@PathVariable String username, RedirectAttributes attrs) {
-        log.traceEntry("username: {}", username);
+        log.traceEntry("delete({})", username);
+        try {
+            if (svc.delete(username)) {
+                attrs.addFlashAttribute("successMessage", "User deleted: " + username);
+            } else {
+                attrs.addFlashAttribute("errorMessage", "Failed to delete user: " + username);
+            }
 
-        if (svc.delete(username)) {
-            attrs.addFlashAttribute("successMessage", "User deleted: " + username);
-        } else {
-            attrs.addFlashAttribute("errorMessage", "Failed to delete user: " + username);
+            return "redirect:/users";
+        } catch (AccessDeniedException e) {
+            log.warn("Can't delete user", e);
+            attrs.addFlashAttribute("errorMessage", "Access denied: Admin privileges required");
+            return "redirect:/";
         }
-
-        return "redirect:/users";
     }
 }
