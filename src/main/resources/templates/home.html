@@ -26,8 +26,6 @@
                 </form>
             </div>
             <div sec:authorize="!isAuthenticated()">
-                <!-- You should never see this! A non-authenticated user should never get to this page! -->
-                <p>Not logged in</p>
                 <a href="/login">Login</a>
             </div>
         </div>
