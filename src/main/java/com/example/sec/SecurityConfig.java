@@ -7,6 +7,7 @@ package com.example.sec;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -14,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     private final SecUserDetailsService svc;
 
@@ -41,8 +43,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public", "/h2-console/**").permitAll() //
                         .requestMatchers("/admin").hasRole("ADMIN") //
                         .requestMatchers("/private").hasRole("USER") //
-                        // Allow access to user management endpoints for admins
-                        .requestMatchers("/users/**").hasRole("ADMIN") //
+                        // require only to be logged - see service for security check
+                        .requestMatchers("/users/**").authenticated() //
                         .anyRequest().denyAll())
                 // Disable Cross-Site Request Forgery for H2
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
