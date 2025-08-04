@@ -5,9 +5,9 @@
 - 1.1 - No security
 - 1.2 - Default security
 - 1.3 - HTTP Basic Authentication
-- 1.4 - Form-Based Login
+- 1.5 - Form-Based Login
 
-## 1.4 - Form-Based Login
+## 1.5 - Form-Based Login
 
 Login for classic web application through HTML form
 
