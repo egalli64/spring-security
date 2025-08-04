@@ -9,23 +9,15 @@
 - 2.2 - Security users management
 - 2.3 - Database Authentication Setup
 - 2.4 - Method-Level Security
+- 2.5 - Advanced Exception Handling
 
-## 2.4 - Method-Level Security
+## 2.5 - Advanced Exception Handling
 
-- Method-Level Security activation
-	- SecurityConfig: annotated also with @EnableMethodSecurity
-- @PreAuthorize
-	- SecUserService: using SpEL hasRole(), hasAnyRole(), authentication.name == #username"
-- @PostAuthorize
-	- SecUserService: using also specific returnObject SpEL
-- @RolesAllowed
-	- SecUserService: if @Secured is used instead, prefix the role name with "ROLE_"
-- Flexibility:
-	- SecurityConfig: could just require to user to be logged to access some endpoints
-		- invoke authenticated() on the endpoint requestMatchers()
-		- delegate security check to the service
-- AccessDeniedException
-	- UserController: check if the service throws an exception
-		- Generate an error message
-		- Use RedirectAttributes to pass the error message to the redirected endpoint
-	
+- Create the Global Security Exception Handler
+	- SecurityExceptionHandler (new): annotated @ControllerAdvice
+		- with a method annotated @ExceptionHandler(AccessDeniedException.class)
+- The controllers don't have to manage the exception explicitly
+	- UserViewController (new): split from UserController
+		- delegate AccessDeniedException to the global handler
+- The controllers can have their own local @ExceptionHandler, overriding the global one
+	- UserController: local exception handler, and even a method with its own handling
