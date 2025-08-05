@@ -54,6 +54,16 @@ public class AppController {
         return "simple";
     }
 
+    @GetMapping("/reports")
+    public String reportsEndpoint(Model model) {
+        log.traceEntry("reportsEndpoint()");
+
+        model.addAttribute("title", "Reports page");
+        model.addAttribute("content", "This page requires reports authority");
+
+        return "simple";
+    }
+    
     /**
      * Custom login page
      */
