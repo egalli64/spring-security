@@ -39,10 +39,11 @@ public class SecurityConfig {
                 .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").permitAll())
                 // use the app-specific UserDetailsService
                 .userDetailsService(svc)
-                // Two roles + public and H2 console
+                // Two roles, an authority + public and H2 console
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public", "/h2-console/**").permitAll() //
                         .requestMatchers("/admin").hasRole("ADMIN") //
                         .requestMatchers("/private").hasRole("USER") //
+                        .requestMatchers("/reports").hasAuthority("VIEW_REPORTS")
                         // require only to be logged - see service for security check
                         .requestMatchers("/users/**").authenticated() //
                         .anyRequest().denyAll())
