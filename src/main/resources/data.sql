@@ -4,6 +4,8 @@
  * https://github.com/egalli64/spring-security
  */
 
+drop table if exists user_authorities;
+drop table if exists authorities;
 drop table if exists user_roles;
 drop table if exists roles;
 drop table if exists users;
