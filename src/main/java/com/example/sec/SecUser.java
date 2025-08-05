@@ -49,6 +49,10 @@ public class SecUser {
     @JoinTable(name = "USER_ROLES", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<SecRole> roles = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @JoinTable(name = "USER_AUTHORITIES", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
+    private Set<SecAuthority> authorities = new HashSet<>();
+
     public SecUser() {
     }
 
@@ -122,17 +126,35 @@ public class SecUser {
         this.roles = roles;
     }
 
+    public Set<SecAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<SecAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
     // Helper
     public Set<String> getRoleNames() {
-        Set<String> roleNames = new HashSet<>();
+        Set<String> names = new HashSet<>();
         for (SecRole role : roles) {
-            roleNames.add(role.getName());
+            names.add(role.getName());
         }
-        return roleNames;
+        return names;
+    }
+
+    // Helper
+    public Set<String> getAuthorityNames() {
+        Set<String> names = new HashSet<>();
+        for (SecAuthority auth : authorities) {
+            names.add(auth.getName());
+        }
+        return names;
     }
 
     @Override
     public String toString() {
-        return "SecUser{" + username + ", roles=" + getRoleNames() + ", enabled=" + enabled + '}';
+        return "SecUser{" + username + ", roles=" + getRoleNames() + ", auths=" + getAuthorityNames() //
+                + ", enabled=" + enabled + '}';
     }
 }
