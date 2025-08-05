@@ -74,9 +74,13 @@ public class UserController {
      */
     @PostMapping("/create")
     public String create(@RequestParam String username, @RequestParam String password,
-            @RequestParam(required = false) boolean hasUserRole, @RequestParam(required = false) boolean hasAdminRole,
+            @RequestParam(required = false) boolean hasUserRole, //
+            @RequestParam(required = false) boolean hasAdminRole,
+            @RequestParam(required = false) boolean hasViewReportAuth,
+            @RequestParam(required = false) boolean hasEditPostsAuth, //
             RedirectAttributes attrs) {
-        log.traceEntry("create({}, {}, {})", username, hasUserRole, hasAdminRole);
+        log.traceEntry("create({}, {}, {}, {}, {})", //
+                username, hasUserRole, hasAdminRole, hasViewReportAuth, hasEditPostsAuth);
 
         try {
             Set<String> roles = Set.of();
@@ -94,7 +98,16 @@ public class UserController {
                 return "redirect:/users/create";
             }
 
-            svc.create(username, password, roles);
+            Set<String> auths = Set.of();
+            if (hasViewReportAuth && hasEditPostsAuth) {
+                roles = Set.of("VIEW_REPORTS", "EDIT_POSTS");
+            } else if (hasViewReportAuth) {
+                roles = Set.of("VIEW_REPORTS");
+            } else if (hasEditPostsAuth) {
+                roles = Set.of("EDIT_POSTS");
+            }
+
+            svc.create(username, password, roles, auths);
             attrs.addFlashAttribute("successMessage", "User created successfully: " + username);
             return "redirect:/users";
         } catch (AccessDeniedException e) {
