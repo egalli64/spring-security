@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SecAuthorityRepository extends JpaRepository<SecRole, Long> {
+public interface SecAuthorityRepository extends JpaRepository<SecAuthority, Long> {
     Optional<SecAuthority> findByName(String name);
 
     boolean existsByName(String name);
