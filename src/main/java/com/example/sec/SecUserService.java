@@ -22,27 +22,37 @@ import jakarta.annotation.security.RolesAllowed;
 public class SecUserService {
     private final SecUserRepository userRepo;
     private final SecRoleRepository roleRepo;
+    private final SecAuthorityRepository authRepo;
     private final PasswordEncoder encoder;
 
-    public SecUserService(SecUserRepository userRepo, SecRoleRepository roleRepo, PasswordEncoder encoder) {
+    public SecUserService(SecUserRepository userRepo, SecRoleRepository roleRepo, SecAuthorityRepository authRepo,
+            PasswordEncoder encoder) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
+        this.authRepo = authRepo;
         this.encoder = encoder;
     }
 
     @RolesAllowed("ADMIN")
 //    @Secured("ROLE_ADMIN")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public SecUser create(String username, String password, Set<String> roleNames) {
+    public SecUser create(String username, String password, Set<String> roleNames, Set<String> authNames) {
         if (userRepo.existsByUsername(username)) {
             throw new IllegalArgumentException("User already exists: " + username);
         }
 
         Set<SecRole> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            SecRole role = roleRepo.findByName(roleName)
-                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
+        for (String name : roleNames) {
+            SecRole role = roleRepo.findByName(name)
+                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + name));
             roles.add(role);
+        }
+
+        Set<SecAuthority> auths = new HashSet<>();
+        for (String name : authNames) {
+            SecAuthority auth = authRepo.findByName(name)
+                    .orElseThrow(() -> new IllegalArgumentException("Authorization not found: " + name));
+            auths.add(auth);
         }
 
         SecUser user = new SecUser(username, encoder.encode(password), roles);
