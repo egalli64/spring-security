@@ -6,6 +6,7 @@
 
 package com.example.sec;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,20 +41,26 @@ public class SecUserDetailsService implements UserDetailsService {
             return new UsernameNotFoundException("User not found: " + username);
         });
 
-        log.debug("Found user '{}' with roles '{}'", user.getUsername(), user.getRoles());
+        log.debug("Found user '{}' with roles {} and authorities {}", //
+                user.getUsername(), user.getRoles(), user.getAuthorities());
 
         // Convert business user to Security UserDetails
         return User.builder().username(user.getUsername()).password(user.getPassword())
-                .authorities(mapRolesToAuthorities(user.getRoleNames())).accountExpired(user.isAccountExpired())
+                .authorities(mapRolesToAuthorities(user)).accountExpired(user.isAccountExpired())
                 .accountLocked(user.isAccountLocked()).credentialsExpired(user.isCredentialsExpired())
                 .disabled(!user.isEnabled()).build();
     }
 
-    /**
-     * Convert role strings to Spring Security authorities
-     */
-    private Collection<GrantedAuthority> mapRolesToAuthorities(Collection<String> roles) {
-        return roles.stream().map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
-                .map(SimpleGrantedAuthority::new).<GrantedAuthority>map(x -> x).toList();
+    private Collection<GrantedAuthority> mapRolesToAuthorities(SecUser user) {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+        // Add roles with ROLE_ prefix
+        user.getRoleNames().stream().map(role -> "ROLE_" + role).map(SimpleGrantedAuthority::new)
+                .forEach(authorities::add);
+
+        // Add authorities as-is
+        user.getAuthorityNames().stream().map(SimpleGrantedAuthority::new).forEach(authorities::add);
+
+        return authorities;
     }
 }
