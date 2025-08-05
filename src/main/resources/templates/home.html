@@ -18,8 +18,8 @@
             </div>
             <div sec:authorize="isAuthenticated()">
                 <p>
-                    Welcome, <span sec:authentication="name">unknown</span>! Your roles: <span
-                        sec:authentication="principal.authorities">roles</span> <br>
+                    Welcome, <span sec:authentication="name">unknown</span>! Your authorities: <span
+                        sec:authentication="principal.authorities">authorities</span>
                 </p>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit">Logout</button>
@@ -33,11 +33,13 @@
         <h2>Available Endpoints:</h2>
 
         <ul>
-            <li><a href="/">/ (home)</a> <em>Should be accessible to everyone</em></li>
-            <li><a href="/public">/public</a> <em>Should be accessible to everyone</em></li>
-            <li sec:authorize="hasRole('USER')"><a href="/private">/private</a> <em>Should require user role</em></li>
-            <li sec:authorize="hasRole('ADMIN')"><a href="/admin">/admin</a> <em>Should require admin role</em></li>
-            <li><a href="/users">/users</a> <em>User management (admin)</em></li>
+            <li><a href="/">/ (home)</a> <em>Accessible to everyone</em></li>
+            <li><a href="/public">/public</a> <em>Accessible to everyone</em></li>
+            <li sec:authorize="hasRole('USER')"><a href="/private">/private</a> <em>For user role</em></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/admin">/admin</a> <em>For admin role</em></li>
+            <li><a href="/users">/users</a> <em>User management</em></li>
+            <li sec:authorize="hasAuthority('REPORTS_AUTHORITY')"><a href="/reports">/reports</a> <em>Specific
+                    authority required</em></li>
         </ul>
     </div>
 </body>
