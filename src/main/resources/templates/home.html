@@ -37,8 +37,10 @@
             <li><a href="/public">/public</a> <em>Accessible to everyone</em></li>
             <li sec:authorize="hasRole('USER')"><a href="/private">/private</a> <em>For user role</em></li>
             <li sec:authorize="hasRole('ADMIN')"><a href="/admin">/admin</a> <em>For admin role</em></li>
+            <li sec:authorize="hasRole('ADMIN') and hasAuthority('VIEW_REPORTS')"><a href="/admin/reports">/admin/reports</a>
+                <em>admin + reports</em></li>
             <li><a href="/users">/users</a> <em>User management</em></li>
-            <li sec:authorize="hasAuthority('REPORTS_AUTHORITY')"><a href="/reports">/reports</a> <em>Specific
+            <li sec:authorize="hasAuthority('VIEW_REPORTS')"><a href="/reports">/reports</a> <em>Specific
                     authority required</em></li>
         </ul>
     </div>
