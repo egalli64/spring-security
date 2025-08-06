@@ -11,23 +11,14 @@
 - 2.4 - Method-Level Security
 - 2.5 - Advanced Exception Handling
 - 2.6 - Advanced URL-based Authorization /1
+- 2.7 - Advanced URL-based Authorization /2
 
-## 2.6 - Advanced URL-based Authorization /1
+## 2.7 - Advanced URL-based Authorization /2
 
-- Add a new entity to represent authorities
-	- data.sql: new tables authorities and user_authorities
-	- SecAuthority (new): JPA entity
-	- SecAuthorityRepository (new): JPA repository
-	- SecUser: many-to-many relation to authority
-	- SecUserDetailsService: a UserDetails can also have (plain) authorities
-	- SecUserService: a SecUser can also have (plain) authorities
-	- UserController: a new user can also have (plain) authorities
+- Add a admin user with no VIEW_REPORTS authority
+	- data.sql: new user admin2
 
-- Add an endpoint accessible only for a given authority
-	- SecurityConfig: the filter chain has a request matcher between /reports and a (plain) authority
-	- AppController: map /reports endpoint to simple ThymeLeaf template
-	
-- View changes
-	- home.html: link to /reports showed only if the user has the authority to access it
-	- user-create.html: available (plain) authorities for new user
-	- user-details.html: show (plain) authorities for the current user
+- Add an endpoint accessible only for a given role/authority
+	- SecurityConfig: add a request matcher between /admin/reports and role + authority
+	- AppController: map /admin/reports endpoint to simple ThymeLeaf template	
+	- home.html: link to /admin/reports showed only if the user has the role + authority to access it
