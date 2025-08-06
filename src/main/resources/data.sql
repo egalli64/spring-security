@@ -23,10 +23,11 @@ CREATE TABLE users (
 
 -- passwords are BCrypt encoded (password, admin, super, disabled)
 INSERT INTO users (username, password, enabled, account_expired, account_locked, credentials_expired) VALUES
-('user', '$2a$10$Nz6HnrrNtZaq7geejWO/UeBGx1XBuCYPkEQYSougOC3hsMWU4bP8O', true, false, false, false), 
-('admin', '$2a$10$P8wz0QHgXsx26dT0EhYcSe/Q5puYlZ6GVn97b9CHumoHLByav1Rq.', true, false, false, false), 
-('superuser', '$2a$10$SorlL/lHnLySkw9XVts7Lep5jgf2ZiItEK.rZC03fTFOrEmrIEm3K', true, false, false, false), 
-('disabled', '$2a$10$hNdqUfpjggSoiVGpVfL8k.QfMOVPC0B/cditiZVLCkwNBS2qChUQO', false, false, false, false); 
+('user', '$2a$10$Nz6HnrrNtZaq7geejWO/UeBGx1XBuCYPkEQYSougOC3hsMWU4bP8O', true, false, false, false),
+('admin', '$2a$10$P8wz0QHgXsx26dT0EhYcSe/Q5puYlZ6GVn97b9CHumoHLByav1Rq.', true, false, false, false),
+('admin2', '$2a$10$P8wz0QHgXsx26dT0EhYcSe/Q5puYlZ6GVn97b9CHumoHLByav1Rq.', true, false, false, false),
+('superuser', '$2a$10$SorlL/lHnLySkw9XVts7Lep5jgf2ZiItEK.rZC03fTFOrEmrIEm3K', true, false, false, false),
+('disabled', '$2a$10$hNdqUfpjggSoiVGpVfL8k.QfMOVPC0B/cditiZVLCkwNBS2qChUQO', false, false, false, false);
 
 --
 CREATE TABLE roles (
@@ -48,6 +49,7 @@ CREATE TABLE user_roles (
 INSERT INTO user_roles (user_id, role_id) VALUES
 ((SELECT id FROM users WHERE username = 'user'), (SELECT id FROM roles WHERE name = 'USER')),
 ((SELECT id FROM users WHERE username = 'admin'), (SELECT id FROM roles WHERE name = 'ADMIN')),
+((SELECT id FROM users WHERE username = 'admin2'), (SELECT id FROM roles WHERE name = 'ADMIN')),
 ((SELECT id FROM users WHERE username = 'superuser'), (SELECT id FROM roles WHERE name = 'USER')),
 ((SELECT id FROM users WHERE username = 'superuser'), (SELECT id FROM roles WHERE name = 'ADMIN')),
 ((SELECT id FROM users WHERE username = 'disabled'), (SELECT id FROM roles WHERE name = 'USER'));
