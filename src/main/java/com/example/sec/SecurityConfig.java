@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +29,10 @@ public class SecurityConfig {
      */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Wrap a SpEL to be used in the access() call
+        final WebExpressionAuthorizationManager adminWithReportsAccess = new WebExpressionAuthorizationManager(
+                "hasRole('ADMIN') and hasAuthority('VIEW_REPORTS')");
+
         // Disable HTTP Basic - using form login instead
         http.httpBasic(httpBasic -> httpBasic.disable())
                 // Enable form login - custom login page
@@ -43,7 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/public", "/h2-console/**").permitAll() //
                         .requestMatchers("/admin").hasRole("ADMIN") //
                         .requestMatchers("/private").hasRole("USER") //
-                        .requestMatchers("/reports").hasAuthority("VIEW_REPORTS")
+                        .requestMatchers("/reports").hasAuthority("VIEW_REPORTS") //
+                        .requestMatchers("/admin/reports").access(adminWithReportsAccess) //
                         // require only to be logged - see service for security check
                         .requestMatchers("/users/**").authenticated() //
                         .anyRequest().denyAll())
