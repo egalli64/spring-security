@@ -54,6 +54,16 @@ public class AppController {
         return "simple";
     }
 
+    @GetMapping("/admin/reports")
+    public String adminReportsEndpoint(Model model) {
+        log.traceEntry("adminReportsEndpoint()");
+
+        model.addAttribute("title", "Admin reports page");
+        model.addAttribute("content", "This page requires admin role and view reports authority");
+
+        return "simple";
+    }
+    
     @GetMapping("/reports")
     public String reportsEndpoint(Model model) {
         log.traceEntry("reportsEndpoint()");
